@@ -139,7 +139,8 @@
 }
 
 @layer base {
-  body { font-family: var(--font-body); }
+  body { font-family: var(--font-body); font-variant-numeric: lining-nums; }
+  .font-display, h1, h2, h3 { font-variant-numeric: lining-nums; }
   h1, h2, h3 { font-family: var(--display-font); }
 }
 
