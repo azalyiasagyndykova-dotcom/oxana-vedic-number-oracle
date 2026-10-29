@@ -20,7 +20,7 @@ export const Route = createFileRoute("/")({
 function meaning(key: PositionKey | "integral" | "vector" | "expression", n: number, title: string) {
   if (n === 0) return zeroText(title);
   if (n < 0) return negativeText(title, n);
-  return NUMBERS[n].s[key as Exclude<PositionKey, "character">];
+  return NUMBERS[n]!.s[key as Exclude<PositionKey, "character">];
 }
 
 function Contacts({ compact = false }: { compact?: boolean }) {
@@ -124,7 +124,7 @@ function Index() {
 
 function Report({ r, name, onPrint }: { r: YantraResult; name: string; onPrint: (bw: boolean) => void }) {
   const dateStr = `${String(r.date.day).padStart(2, "0")}.${String(r.date.month).padStart(2, "0")}.${r.date.year}`;
-  const ch = NUMBERS[r.matrix.character];
+  const ch = NUMBERS[r.matrix.character]!;
 
   return (
     <section id="report" className="mx-auto max-w-4xl px-5 py-12">

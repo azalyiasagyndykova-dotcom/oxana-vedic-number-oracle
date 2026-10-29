@@ -23,11 +23,11 @@ describe("Янтра", () => {
 
   it("сумма любой строки и столбца сводится к интегралу", () => {
     const r = calculateYantra(28, 12, 1987);
-    const v = r.grid.map((k) => r.matrix[k]);
+    const v = r.grid.map((k) => r.matrix[k]) as number[];
     const red = (n: number) => { let x = ((n % 9) + 9) % 9; return x === 0 ? 9 : x; };
     for (let i = 0; i < 4; i++) {
-      expect(red(v[i * 4] + v[i * 4 + 1] + v[i * 4 + 2] + v[i * 4 + 3])).toBe(r.integral);
-      expect(red(v[i] + v[i + 4] + v[i + 8] + v[i + 12])).toBe(r.integral);
+      expect(red(v[i * 4]! + v[i * 4 + 1]! + v[i * 4 + 2]! + v[i * 4 + 3]!)).toBe(r.integral);
+      expect(red(v[i]! + v[i + 4]! + v[i + 8]! + v[i + 12]!)).toBe(r.integral);
     }
   });
 
