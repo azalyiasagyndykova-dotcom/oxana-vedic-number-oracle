@@ -304,7 +304,7 @@ export function zeroText(title: string): string {
 
 export function negativeText(title: string, n: number): string {
   const abs = Math.abs(n);
-  const m = NUMBERS[10 - abs] ?? NUMBERS[9];
+  const m = NUMBERS[10 - abs] ?? NUMBERS[9]!;
   return `Отрицательное число (${n}) в позиции «${title}» указывает на кармическую задачу. Эта сфера требует особого внимания: качества, которые даются другим легко, вам предстоит осознанно развивать. Опорой станет энергия числа ${10 - abs} (${m.planet}): ${m.plus.slice(0, 2).join(" и ")}.`;
 }
 

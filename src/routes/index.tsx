@@ -20,7 +20,7 @@ export const Route = createFileRoute("/")({
 function meaning(key: PositionKey | "integral" | "vector" | "expression", n: number, title: string) {
   if (n === 0) return zeroText(title);
   if (n < 0) return negativeText(title, n);
-  return NUMBERS[n].s[key as Exclude<PositionKey, "character">];
+  return NUMBERS[n]!.s[key as Exclude<PositionKey, "character">];
 }
 
 function Contacts({ compact = false }: { compact?: boolean }) {
@@ -65,7 +65,12 @@ function Index() {
   function print(bw: boolean) {
     const root = document.documentElement;
     root.classList.toggle("bw", bw);
-    const done = () => { root.classList.remove("bw"); window.removeEventListener("afterprint", done); };
+    const oldTitle = document.title;
+    if (result) {
+      const ds = `${String(result.date.day).padStart(2, "0")}.${String(result.date.month).padStart(2, "0")}.${result.date.year}`;
+      document.title = `${personName || "Разбор"} ${ds}${bw ? " (ч-б)" : ""}`;
+    }
+    const done = () => { root.classList.remove("bw"); document.title = oldTitle; window.removeEventListener("afterprint", done); };
     window.addEventListener("afterprint", done);
     setTimeout(() => window.print(), 50);
   }
@@ -119,16 +124,16 @@ function Index() {
 
 function Report({ r, name, onPrint }: { r: YantraResult; name: string; onPrint: (bw: boolean) => void }) {
   const dateStr = `${String(r.date.day).padStart(2, "0")}.${String(r.date.month).padStart(2, "0")}.${r.date.year}`;
-  const ch = NUMBERS[r.matrix.character];
+  const ch = NUMBERS[r.matrix.character]!;
 
   return (
     <section id="report" className="mx-auto max-w-4xl px-5 py-12">
-      <div className="no-print mb-8 flex flex-col gap-3 rounded-2xl border border-border bg-secondary p-5 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-secondary-foreground">Сохраните разбор в PDF: в окне печати выберите «Сохранить как PDF».</p>
-        <div className="flex gap-2">
-          <button onClick={() => onPrint(false)} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Цветной PDF</button>
-          <button onClick={() => onPrint(true)} className="rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary">Чёрно-белый PDF</button>
+      <div className="no-print sticky top-0 z-20 -mx-5 mb-8 border-b border-border bg-secondary/95 px-5 py-3 backdrop-blur">
+        <div className="mx-auto grid max-w-4xl grid-cols-2 gap-2">
+          <button onClick={() => onPrint(false)} className="min-h-12 rounded-xl bg-primary px-3 py-3 text-sm font-semibold text-primary-foreground sm:text-base">⬇ Скачать цветной</button>
+          <button onClick={() => onPrint(true)} className="min-h-12 rounded-xl border-2 border-primary bg-card px-3 py-3 text-sm font-semibold text-primary sm:text-base">⬇ Скачать ч-б</button>
         </div>
+        <p className="mt-2 text-center text-xs text-secondary-foreground">В открывшемся окне выберите «Сохранить как PDF» (на iPhone/iPad — «Поделиться» → «Сохранить в Файлы»).</p>
       </div>
 
       <header className="report-section rounded-2xl border-2 border-gold bg-card p-6 text-center">
