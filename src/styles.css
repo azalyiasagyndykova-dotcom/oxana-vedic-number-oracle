@@ -52,7 +52,7 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
   --color-gold: var(--gold);
-  --font-display: var(--font-display);
+  --font-display: var(--display-font);
   --font-sans: var(--font-body);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
@@ -89,7 +89,7 @@
   --gradient-hero: radial-gradient(ellipse at top, oklch(0.45 0.13 25), oklch(0.28 0.09 20) 70%);
   --gradient-gold: linear-gradient(135deg, oklch(0.8 0.13 80), oklch(0.66 0.14 60));
   --shadow-soft: 0 20px 50px -25px oklch(0.38 0.12 22 / 0.45);
-  --font-display: "Cormorant Garamond", Georgia, serif;
+  --display-font: "Cormorant Garamond", Georgia, serif;
   --font-body: "Manrope", system-ui, sans-serif;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -140,7 +140,7 @@
 
 @layer base {
   body { font-family: var(--font-body); }
-  h1, h2, h3 { font-family: var(--font-display); }
+  h1, h2, h3 { font-family: var(--display-font); }
 }
 
 @utility bg-hero { background: var(--gradient-hero); }
