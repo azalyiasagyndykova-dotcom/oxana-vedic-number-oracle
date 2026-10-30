@@ -7,13 +7,14 @@ export async function downloadReport(el: HTMLElement, fileName: string, bw: bool
   root.classList.add("pdf-mode");
   try {
     const blob: Blob = await html2pdf()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .set({
         margin: [10, 10, 10, 10],
         image: { type: "jpeg", quality: 0.95 },
         html2canvas: { scale: 2, useCORS: true, windowWidth: 760, backgroundColor: getComputedStyle(document.body).backgroundColor },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         pagebreak: { mode: ["css", "legacy"], before: ".page-break", avoid: ".avoid" },
-      })
+      } as any)
       .from(el)
       .outputPdf("blob");
     const file = new File([blob], `${fileName}.pdf`, { type: "application/pdf" });
