@@ -10,4 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Numerology formulas live only in src/lib/numerology.ts and are covered by src/test/numerology.test.ts; interpretation texts live in src/lib/texts.ts — keeps math verifiable separately from copy.
-- Printable report uses window.print with a `.bw` class on <html> that swaps tokens to black-and-white — one layout serves both colour and B/W PDFs.
+- PDF download renders #report-doc with html2canvas-pro + jsPDF (src/lib/download.ts), cutting pages only between text lines; a `.bw` class on <html> swaps tokens to black-and-white; touch devices get the share sheet — real file, named after client, no print dialog.
