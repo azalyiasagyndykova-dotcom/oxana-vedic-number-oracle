@@ -107,3 +107,29 @@ export function calculateYantra(day: number, month: number, year: number): Yantr
     expression: reduce(d + m),
   };
 }
+
+export interface BasicReport {
+  date: { day: number; month: number; year: number };
+  mind: number;
+  path: number;
+  dharma: number;
+  cycle: number;
+  cycleYear: number;
+  finCode: string;
+}
+
+/** Пять ключевых параметров разбора (как в образце). Цикл жизни — по календарному году. */
+export function calculateBasics(day: number, month: number, year: number, currentYear: number): BasicReport {
+  const y = calculateYantra(day, month, year);
+  const dd = String(day).padStart(2, "0");
+  const mm = String(month).padStart(2, "0");
+  return {
+    date: y.date,
+    mind: y.base.day,
+    path: y.base.lifePath,
+    dharma: reduce(y.base.day + y.base.month),
+    cycle: reduce(digitSum(dd + mm + String(currentYear))),
+    cycleYear: currentYear,
+    finCode: `${y.base.day}${y.base.month}${y.base.year}${y.base.lifePath}`,
+  };
+}
