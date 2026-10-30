@@ -7,7 +7,9 @@ function layout(el: HTMLElement) {
   const top = el.getBoundingClientRect().top;
   const atoms = [...el.querySelectorAll<HTMLElement>("p, li, h1, h2, h3, h4, .avoid-cell")].map((n) => {
     const r = n.getBoundingClientRect();
-    return [r.top - top, r.bottom - top] as const;
+    // заголовок держим вместе с началом следующего текста
+    const keep = /^H[1-4]$/.test(n.tagName) ? 90 : 0;
+    return [r.top - top, r.bottom - top + keep] as const;
   });
   const forced = [...el.querySelectorAll<HTMLElement>(".page-break")].map((n) => n.getBoundingClientRect().top - top);
   return { atoms, forced };
@@ -48,7 +50,7 @@ export async function downloadReport(el: HTMLElement, fileName: string, bw: bool
     const [r, g, b] = probe.getImageData(0, 0, 1, 1).data;
     const bg = `rgb(${r}, ${g}, ${b})`;
     const scale = 2;
-    const canvas = await html2canvas(el, { scale, backgroundColor: bg, windowWidth: WIDTH + 40 });
+    const canvas = await html2canvas(el, { scale, backgroundColor: bg, windowWidth: document.documentElement.clientWidth });
     const pdf = new jsPDF({ unit: "mm", format: "a4" });
     const margin = 10, pw = 210 - margin * 2, ph = 297 - margin * 2;
     const pxPerMm = WIDTH / pw;
