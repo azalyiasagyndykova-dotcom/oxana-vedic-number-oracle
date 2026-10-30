@@ -81,14 +81,14 @@ function Index() {
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <section className="no-print bg-hero px-5 pb-20 pt-16 text-primary-foreground">
+      <section className="no-print bg-hero px-5 pb-10 pt-10 text-primary-foreground">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-xs uppercase tracking-[0.35em] text-accent">Ведическая нумерология</p>
           <h1 className="mt-4 text-5xl font-semibold leading-tight md:text-7xl">Янтра вашей судьбы</h1>
           <p className="mx-auto mt-5 max-w-xl text-base opacity-85">
-            Введите дату рождения — и получите точный расчёт 16 чисел матрицы и личный разбор, который можно сохранить в цвете или в чёрно-белом варианте для печати.
+            Введите имя и дату рождения - и получите подробный личный разбор: Число Ума, Число Жизненного Пути, Дхарму, Цикл Жизни и Финансовый код. Сохраните его в цвете или в чёрно-белом варианте для печати.
           </p>
-          <form onSubmit={onSubmit} className="mx-auto mt-10 grid max-w-xl gap-3 rounded-2xl bg-card p-5 text-left text-card-foreground shadow-soft md:grid-cols-[1fr_1fr_auto]">
+          <form onSubmit={onSubmit} className="mx-auto mt-6 grid max-w-xl gap-3 rounded-2xl bg-card p-5 text-left text-card-foreground shadow-soft md:grid-cols-[1fr_1fr_auto]">
             <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Имя
               <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ваше имя"
@@ -120,7 +120,7 @@ function Index() {
         </section>
       )}
 
-      <footer className="no-print mx-auto max-w-4xl px-5 py-14">
+      <footer className="no-print mx-auto max-w-4xl px-5 py-10">
         <h2 className="text-center text-3xl font-semibold text-primary">Личная консультация</h2>
         <p className="mb-6 mt-2 text-center text-sm text-muted-foreground">Оксана Шиповская — нумеролог. Напишите в удобный мессенджер.</p>
         <Contacts />
