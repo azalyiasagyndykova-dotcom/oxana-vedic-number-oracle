@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
-import { calculateYantra, isValidDate, type YantraResult, type PositionKey } from "@/lib/numerology";
-import { POSITIONS, NUMBERS, zeroText, negativeText, CONTACTS } from "@/lib/texts";
+import { calculateBasics, isValidDate, type BasicReport } from "@/lib/numerology";
+import { CONTACTS } from "@/lib/texts";
+import { Report } from "@/components/Report";
+import { downloadReport } from "@/lib/download";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,12 +18,6 @@ export const Route = createFileRoute("/")({
   }),
   component: Index,
 });
-
-function meaning(key: PositionKey | "integral" | "vector" | "expression", n: number, title: string) {
-  if (n === 0) return zeroText(title);
-  if (n < 0) return negativeText(title, n);
-  return NUMBERS[n]!.s[key as Exclude<PositionKey, "character">];
-}
 
 function Contacts({ compact = false }: { compact?: boolean }) {
   const items = [
@@ -47,7 +43,7 @@ function Index() {
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
   const [error, setError] = useState("");
-  const [result, setResult] = useState<YantraResult | null>(null);
+  const [result, setResult] = useState<BasicReport | null>(null);
   const [personName, setPersonName] = useState("");
 
   function onSubmit(e: FormEvent) {
@@ -58,21 +54,21 @@ function Index() {
     if (!isValidDate(d, mo, y)) return setError("Такой даты не существует. Проверьте день, месяц и год.");
     setError("");
     setPersonName(name.trim());
-    setResult(calculateYantra(d, mo, y));
+    setResult(calculateBasics(d, mo, y, new Date().getFullYear()));
     setTimeout(() => document.getElementById("report")?.scrollIntoView({ behavior: "smooth" }), 50);
   }
 
-  function print(bw: boolean) {
-    const root = document.documentElement;
-    root.classList.toggle("bw", bw);
-    const oldTitle = document.title;
-    if (result) {
-      const ds = `${String(result.date.day).padStart(2, "0")}.${String(result.date.month).padStart(2, "0")}.${result.date.year}`;
-      document.title = `${personName || "Разбор"} ${ds}${bw ? " (ч-б)" : ""}`;
-    }
-    const done = () => { root.classList.remove("bw"); document.title = oldTitle; window.removeEventListener("afterprint", done); };
-    window.addEventListener("afterprint", done);
-    setTimeout(() => window.print(), 50);
+  const [busy, setBusy] = useState<"" | "color" | "bw">("");
+  async function download(bw: boolean) {
+    if (!result || busy) return;
+    const ds = `${String(result.date.day).padStart(2, "0")}.${String(result.date.month).padStart(2, "0")}.${result.date.year}`;
+    setBusy(bw ? "bw" : "color");
+    try {
+      await downloadReport(document.getElementById("report-doc")!, `${personName || "Разбор"} ${ds}${bw ? " (ч-б)" : ""}`, bw);
+    } catch (e) {
+      console.error(e);
+      alert("Не удалось сохранить файл. Попробуйте ещё раз.");
+    } finally { setBusy(""); }
   }
 
   function onDateInput(v: string) {
@@ -111,7 +107,18 @@ function Index() {
         </div>
       </section>
 
-      {result && <Report r={result} name={personName} onPrint={print} />}
+      {result && (
+        <section id="report" className="mx-auto max-w-3xl px-4 py-6">
+          <div className="sticky top-0 z-20 -mx-4 mb-4 border-b border-border bg-secondary/95 px-4 py-3 backdrop-blur">
+            <div className="grid grid-cols-2 gap-2">
+              <button disabled={!!busy} onClick={() => download(false)} className="min-h-12 rounded-xl bg-primary px-3 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-60 sm:text-base">{busy === "color" ? "Готовлю файл…" : "⬇ Скачать цветной"}</button>
+              <button disabled={!!busy} onClick={() => download(true)} className="min-h-12 rounded-xl border-2 border-primary bg-card px-3 py-3 text-sm font-semibold text-primary disabled:opacity-60 sm:text-base">{busy === "bw" ? "Готовлю файл…" : "⬇ Скачать ч-б"}</button>
+            </div>
+            <p className="mt-1.5 text-center text-xs text-secondary-foreground">На телефоне и iPad откроется меню «Поделиться» - выберите «Заметки», «Файлы» или мессенджер.</p>
+          </div>
+          <div id="report-doc"><Report b={result} name={personName} /></div>
+        </section>
+      )}
 
       <footer className="no-print mx-auto max-w-4xl px-5 py-14">
         <h2 className="text-center text-3xl font-semibold text-primary">Личная консультация</h2>
@@ -119,92 +126,5 @@ function Index() {
         <Contacts />
       </footer>
     </main>
-  );
-}
-
-function Report({ r, name, onPrint }: { r: YantraResult; name: string; onPrint: (bw: boolean) => void }) {
-  const dateStr = `${String(r.date.day).padStart(2, "0")}.${String(r.date.month).padStart(2, "0")}.${r.date.year}`;
-  const ch = NUMBERS[r.matrix.character]!;
-
-  return (
-    <section id="report" className="mx-auto max-w-4xl px-5 py-12">
-      <div className="no-print sticky top-0 z-20 -mx-5 mb-8 border-b border-border bg-secondary/95 px-5 py-3 backdrop-blur">
-        <div className="mx-auto grid max-w-4xl grid-cols-2 gap-2">
-          <button onClick={() => onPrint(false)} className="min-h-12 rounded-xl bg-primary px-3 py-3 text-sm font-semibold text-primary-foreground sm:text-base">⬇ Скачать цветной</button>
-          <button onClick={() => onPrint(true)} className="min-h-12 rounded-xl border-2 border-primary bg-card px-3 py-3 text-sm font-semibold text-primary sm:text-base">⬇ Скачать ч-б</button>
-        </div>
-        <p className="mt-2 text-center text-xs text-secondary-foreground">В открывшемся окне выберите «Сохранить как PDF» (на iPhone/iPad — «Поделиться» → «Сохранить в Файлы»).</p>
-      </div>
-
-      <header className="report-section rounded-2xl border-2 border-gold bg-card p-6 text-center">
-        <p className="text-xs uppercase tracking-[0.35em] text-muted-foreground">Личный разбор · Янтра</p>
-        <h2 className="mt-2 text-4xl font-semibold text-primary md:text-5xl">{name || "Ваша матрица"}</h2>
-        <p className="mt-1 text-lg">{dateStr}</p>
-        <div className="mt-6 grid grid-cols-3 gap-3">
-          {[["Интеграл", r.integral], ["Вектор жизни", r.vector], ["Число экспрессии", r.expression]].map(([l, v]) => (
-            <div key={l as string} className="rounded-xl border border-border p-3">
-              <div className="text-xs text-muted-foreground">{l}</div>
-              <div className="font-display text-4xl font-semibold text-primary">{v}</div>
-            </div>
-          ))}
-        </div>
-      </header>
-
-      <div className="report-section mt-6 grid grid-cols-4 overflow-hidden rounded-2xl border-2 border-gold">
-        {r.grid.map((k, i) => (
-          <div key={k} className="flex min-h-24 flex-col justify-between border border-border bg-card p-2 sm:p-3">
-            <div className="text-[10px] leading-tight text-muted-foreground sm:text-xs">{i + 1}. {POSITIONS[k].title}</div>
-            <div className="text-right font-display text-3xl font-semibold text-primary sm:text-4xl">{r.matrix[k]}</div>
-          </div>
-        ))}
-      </div>
-
-      <article className="report-section mt-10">
-        <h3 className="text-3xl font-semibold text-primary">Характер {r.matrix.character} · {ch.name}</h3>
-        <p className="text-sm text-muted-foreground">Управитель — {ch.planet}. {POSITIONS.character.about}</p>
-        <p className="mt-3 leading-relaxed">{ch.essence}</p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-xl border border-border p-4">
-            <div className="font-semibold text-primary">Сильные стороны</div>
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">{ch.plus.map((p) => <li key={p}>{p}</li>)}</ul>
-          </div>
-          <div className="rounded-xl border border-border p-4">
-            <div className="font-semibold text-primary">Где теряется энергия</div>
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">{ch.minus.map((p) => <li key={p}>{p}</li>)}</ul>
-          </div>
-        </div>
-        <p className="mt-4 border-l-4 border-gold pl-4 italic">{ch.advice}</p>
-      </article>
-
-      {r.grid.filter((k) => k !== "character").map((k) => {
-        const n = r.matrix[k];
-        return (
-          <article key={k} className="report-section mt-8 border-t border-border pt-6">
-            <div className="flex items-baseline gap-3">
-              <span className="font-display text-4xl font-semibold text-gold">{n}</span>
-              <h3 className="text-2xl font-semibold text-primary">{POSITIONS[k].title}</h3>
-            </div>
-            <p className="text-sm text-muted-foreground">{POSITIONS[k].about}</p>
-            <p className="mt-2 leading-relaxed">{meaning(k, n, POSITIONS[k].title)}</p>
-          </article>
-        );
-      })}
-
-      {([["integral", "Интеграл", r.integral], ["vector", "Вектор жизни", r.vector], ["expression", "Число экспрессии", r.expression]] as const).map(([k, t, n]) => (
-        <article key={k} className="report-section mt-8 border-t border-border pt-6">
-          <div className="flex items-baseline gap-3">
-            <span className="font-display text-4xl font-semibold text-gold">{n}</span>
-            <h3 className="text-2xl font-semibold text-primary">{t}</h3>
-          </div>
-          <p className="mt-2 leading-relaxed">{meaning(k, n, t)}</p>
-        </article>
-      ))}
-
-      <div className="report-section mt-12 rounded-2xl border-2 border-gold p-6">
-        <h3 className="text-center text-2xl font-semibold text-primary">Подробная консультация</h3>
-        <p className="mb-4 mt-1 text-center text-sm text-muted-foreground">Оксана Шиповская, нумеролог</p>
-        <Contacts compact />
-      </div>
-    </section>
   );
 }
