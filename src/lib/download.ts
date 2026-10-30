@@ -42,7 +42,11 @@ export async function downloadReport(el: HTMLElement, fileName: string, bw: bool
   try {
     await new Promise((r) => requestAnimationFrame(() => r(null)));
     const { atoms, forced } = layout(el);
-    const bg = getComputedStyle(document.body).backgroundColor;
+    const probe = document.createElement("canvas").getContext("2d")!;
+    probe.fillStyle = getComputedStyle(document.body).backgroundColor;
+    probe.fillRect(0, 0, 1, 1);
+    const [r, g, b] = probe.getImageData(0, 0, 1, 1).data;
+    const bg = `rgb(${r}, ${g}, ${b})`;
     const scale = 2;
     const canvas = await html2canvas(el, { scale, backgroundColor: bg, windowWidth: WIDTH + 40 });
     const pdf = new jsPDF({ unit: "mm", format: "a4" });
@@ -59,7 +63,7 @@ export async function downloadReport(el: HTMLElement, fileName: string, bw: bool
       ctx.fillStyle = bg; ctx.fillRect(0, 0, part.width, part.height);
       ctx.drawImage(canvas, 0, -Math.floor(y0 * scale));
       if (i > 0) pdf.addPage();
-      pdf.setFillColor(bg); pdf.rect(0, 0, 210, 297, "F");
+      pdf.setFillColor(r!, g!, b!); pdf.rect(0, 0, 210, 297, "F");
       pdf.addImage(part.toDataURL("image/jpeg", 0.92), "JPEG", margin, margin, pw, h / pxPerMm);
     }
     const file = new File([pdf.output("blob")], `${fileName}.pdf`, { type: "application/pdf" });
