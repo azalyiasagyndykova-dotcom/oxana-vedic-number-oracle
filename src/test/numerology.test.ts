@@ -36,3 +36,11 @@ describe("Янтра", () => {
     expect(isValidDate(29, 2, 2000)).toBe(true);
   });
 });
+
+import { calculateBasics } from "@/lib/numerology";
+describe("Пять параметров", () => {
+  it("06.03.2002 в 2026 году совпадает с образцом", () => {
+    const b = calculateBasics(6, 3, 2002, 2026);
+    expect([b.mind, b.path, b.dharma, b.cycle, b.finCode]).toEqual([6, 4, 9, 1, "6344"]);
+  });
+});

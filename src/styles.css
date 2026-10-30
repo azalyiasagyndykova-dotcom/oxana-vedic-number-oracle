@@ -156,3 +156,7 @@
   .print-break { break-before: page; }
   body { background: var(--background); }
 }
+
+/* Режим генерации PDF: фиксированная ширина листа */
+.pdf-mode #report-doc { width: 720px; }
+.pdf-mode #report-doc .rounded-xl.bg-secondary { background: var(--secondary); }
