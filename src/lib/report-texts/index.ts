@@ -1,10 +1,6 @@
-import type { MindText, PathText, DharmaText, YearText, KeysText, MoneyDigit } from "@/lib/report-types";
-
-// Временные пустые данные — заменяются готовыми текстами.
-export const MIND: Record<number, MindText> = {};
-export const PATH: Record<number, PathText> = {};
-export const DHARMA: Record<number, DharmaText> = {};
-export const YEAR: Record<number, YearText> = {};
-export const KEYS: Record<number, KeysText> = {};
-export const FLAT: Record<number, string> = {};
-export const MONEY: Record<number, MoneyDigit> = {};
+import { MIND_A } from "./mind_1_5";
+import { MIND_B } from "./mind_6_9";
+export const MIND = { ...MIND_A, ...MIND_B };
+export { PATH } from "./path";
+export { DHARMA } from "./dharma";
+export { YEAR, KEYS, FLAT, MONEY } from "./misc";
