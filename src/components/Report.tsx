@@ -108,7 +108,7 @@ export function Report({ b, name }: { b: BasicReport; name: string }) {
         <div className="avoid mt-2 grid gap-x-6 gap-y-1 sm:grid-cols-2">
           {([["Рождённые", m.born], ["Управитель", k.planet], ["Благоприятный день", k.day], ["Цвет удачи", k.color],
             ["Камень", k.stone], ["Металл", k.metal], ["Сильный период", k.strong], ["Слабый период", k.weak],
-            ["Благоприятные цифры", k.good], ["Нейтральные цифры", k.neutral]] as const).map(([l, v]) => (
+             ["Благоприятные цифры", k.good], ["Нейтральные цифры", k.neutral]] as const).filter(([, v]) => Boolean(v)).map(([l, v]) => (
             <p key={l} className={`leading-snug ${l === "Управитель" ? "sm:col-span-2" : ""}`}><span className="font-semibold text-primary">{l}:</span> {v}</p>
           ))}
         </div>
@@ -126,7 +126,7 @@ export function Report({ b, name }: { b: BasicReport; name: string }) {
       </>}>
         {[...new Set(b.finCode.split(""))].map((c) => {
           const md = MONEY[Number(c)];
-          if (!md) return null;
+           if (!md) return <Block key={c} s={{ title: `Цифра ${c}`, text: "Трактовка этой цифры финансового кода пока не добавлена: требуется отдельный авторский материал." }} />;
           return <Block key={c} s={{ title: `${c} - ${md.title}`, text: md.text }} />;
         })}
       </Part>
