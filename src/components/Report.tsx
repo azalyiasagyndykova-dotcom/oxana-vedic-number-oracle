@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { BasicReport } from "@/lib/numerology";
 import type { Section } from "@/lib/report-types";
-import { MIND, PATH, DHARMA, YEAR, KEYS, FLAT, MONEY } from "@/lib/report-texts";
+import { MIND, PATH, DHARMA, YEAR, KEYS, FLAT, MONEY, REPORT_COMMON } from "@/lib/report-texts";
 
 function Paras({ text }: { text: string | string[] }) {
   const list = Array.isArray(text) ? text : text.split(/\n\n+/);
@@ -43,7 +43,8 @@ function Part({ title, short, children, first }: { title: string; short: ReactNo
 
 export function Report({ b, name }: { b: BasicReport; name: string }) {
   const dateStr = `${String(b.date.day).padStart(2, "0")}.${String(b.date.month).padStart(2, "0")}.${b.date.year}`;
-  const m = MIND[b.mind]!, p = PATH[b.path]!, d = DHARMA[b.dharma]!, y = YEAR[b.cycle]!, k = KEYS[b.mind]!;
+  const m = MIND[b.mind], p = PATH[b.path], d = DHARMA[b.dharma], y = YEAR[b.cycle], k = KEYS[b.mind];
+  if (!m || !p || !d || !y || !k) return null;
   const rows: [string, string | number][] = [
     ["Дата рождения", dateStr], ["Число Ума", b.mind], ["Число Жизненного Пути", b.path],
     ["Дхарма", b.dharma], [`Цикл Жизни (${b.cycleYear})`, b.cycle], ["Финансовый Код", b.finCode],
@@ -76,7 +77,9 @@ export function Report({ b, name }: { b: BasicReport; name: string }) {
       </Part>
 
       <Part title={`Число Жизненного Пути - ${b.path}`} short={<>
-        <p className="mt-1 leading-snug">Число Жизненного Пути отражает основные черты личности, жизненные цели и задачи. Это путь, которым стоит идти, чтобы обрести гармонию и реализовать потенциал. К 32 годам и 7 месяцам ЧЖП раскрывается полностью.</p>
+        <Paras text={REPORT_COMMON.pathIntro} />
+        <Block s={{ title: "Число Жизненного Пути определяет", items: REPORT_COMMON.pathTraits, check: true }} />
+        <Paras text={REPORT_COMMON.pathAcceptance} />
         <p className="mt-2 font-semibold">{p.short}</p>
       </>}>
         <Paras text={p.full} />
@@ -84,7 +87,7 @@ export function Report({ b, name }: { b: BasicReport; name: string }) {
       </Part>
 
       <Part title={`Дхарма - ${b.dharma}`} short={<>
-        <p className="mt-1 leading-snug">Дхарма - внутренний долг души, её предназначение: этапы, поступки и события, которые ведут к духовному росту и улучшают качество жизни.</p>
+        <Paras text={REPORT_COMMON.dharmaIntro} />
         <p className="mt-2 font-semibold">{d.short}</p>
       </>}>
         <Paras text={d.full} />
@@ -100,7 +103,7 @@ export function Report({ b, name }: { b: BasicReport; name: string }) {
       </Part>
 
       <Part title={`Ключи Успеха - ${b.mind}`} short={
-        <p className="mt-1 leading-snug">Дни недели, цвета, камни и числа, которые усиливают вашу энергию, привлекают удачу и гармонию.</p>
+        <Paras text={REPORT_COMMON.keysIntro} />
       }>
         <div className="avoid mt-2 grid gap-x-6 gap-y-1 sm:grid-cols-2">
           {([["Рождённые", m.born], ["Управитель", k.planet], ["Благоприятный день", k.day], ["Цвет удачи", k.color],
@@ -109,18 +112,21 @@ export function Report({ b, name }: { b: BasicReport; name: string }) {
             <p key={l} className={`leading-snug ${l === "Управитель" ? "sm:col-span-2" : ""}`}><span className="font-semibold text-primary">{l}:</span> {v}</p>
           ))}
         </div>
-        <Block s={{ title: "Влияние номера дома или квартиры", text: "Сложите цифры номера, пока не получится одна цифра (например, 245 → 2+4+5 = 11 → 1+1 = 2). Число раскрывает характер пространства и его влияние на вас." }} />
+        <Block s={{ title: "Влияние номера дома или квартиры", text: REPORT_COMMON.flatIntro }} />
+        <Block s={{ title: "Как узнать, какое влияние оказывает номер дома или квартиры", text: REPORT_COMMON.flatCalculation }} />
         <div className="mt-1 space-y-1">
           {Object.entries(FLAT).map(([n, t]) => <p key={n} className="avoid leading-snug"><span className="font-display text-lg font-semibold text-gold">{n}</span> - {t}</p>)}
         </div>
       </Part>
 
       <Part title={`Финансовый код - ${b.finCode}`} short={<>
-        <p className="mt-1 leading-snug">Финансовый код - комбинация чисел, которая помогает привлечь денежную удачу. Его можно использовать как пин-код телефона или карты, записать и хранить в кошельке.</p>
-        <p className="mt-1 leading-snug">Главное правило: код работает в тандеме с вашими действиями. Развитие и готовность прилагать усилия усиливают его влияние.</p>
+        <Paras text={REPORT_COMMON.moneyIntro} />
+        <Paras text={REPORT_COMMON.moneyAction} />
+        <Paras text={REPORT_COMMON.moneyNote} />
       </>}>
         {[...new Set(b.finCode.split(""))].map((c) => {
-          const md = MONEY[Number(c)]!;
+          const md = MONEY[Number(c)];
+          if (!md) return null;
           return <Block key={c} s={{ title: `${c} - ${md.title}`, text: md.text }} />;
         })}
       </Part>

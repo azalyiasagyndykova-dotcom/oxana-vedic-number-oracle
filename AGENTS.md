@@ -9,5 +9,5 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Numerology formulas live only in src/lib/numerology.ts and are covered by src/test/numerology.test.ts; interpretation texts live in src/lib/texts.ts — keeps math verifiable separately from copy.
+- Numerology formulas live only in src/lib/numerology.ts and are covered by src/test/numerology.test.ts; current report interpretation texts live in src/lib/report-texts, with source-backed entries in sample.ts taking precedence through index.ts; src/lib/texts.ts retains legacy Yantra texts and contacts — keeps math verifiable separately from copy and prevents unsupported extrapolation from the sample.
 - PDF download renders #report-doc with html2canvas-pro + jsPDF (src/lib/download.ts), cutting pages only between text lines; a `.bw` class on <html> swaps tokens to black-and-white; touch devices get the share sheet — real file, named after client, no print dialog.
