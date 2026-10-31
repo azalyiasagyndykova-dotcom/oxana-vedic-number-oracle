@@ -32,14 +32,14 @@ export interface YearText {
 
 export interface KeysText {
   planet: string;
-  day: string;
-  color: string;
-  stone: string;
-  metal: string;
-  strong: string;
-  weak: string;
-  good: string;
-  neutral: string;
+  day?: string;
+  color?: string;
+  stone?: string;
+  metal?: string;
+  strong?: string;
+  weak?: string;
+  good?: string;
+  neutral?: string;
 }
 
 export interface MoneyDigit { title: string; text: string }
