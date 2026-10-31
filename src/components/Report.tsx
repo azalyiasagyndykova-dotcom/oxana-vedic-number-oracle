@@ -52,7 +52,7 @@ export function Report({ b, name }: { b: BasicReport; name: string }) {
   return (
     <div className="report-body bg-background text-[15px] text-foreground">
       <section className="avoid rounded-2xl border-2 border-gold bg-card p-5">
-        <p className="text-center text-xs uppercase tracking-[0.35em] text-muted-foreground">Личный разбор</p>
+        <p className="text-center text-xs uppercase tracking-[0.35em] text-muted-foreground">Жизненный Код</p>
         <h1 className="mt-1 text-center text-4xl font-semibold text-primary">{name || "Ваш разбор"}</h1>
         <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {rows.map(([l, v]) => (

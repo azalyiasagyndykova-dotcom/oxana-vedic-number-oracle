@@ -8,10 +8,10 @@ import { downloadReport } from "@/lib/download";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Ведическая нумерология — расчёт Янтры | Оксана Шиповская" },
-      { name: "description", content: "Точный расчёт матрицы Янтра по дате рождения и личный разбор. Скачайте цветную или чёрно-белую версию для печати." },
-      { property: "og:title", content: "Ведическая нумерология — личный разбор по дате рождения" },
-      { property: "og:description", content: "Матрица Янтра, интеграл, вектор и подробный разбор 16 чисел вашей судьбы." },
+      { title: "Жизненный Код | Оксана Шиповская" },
+      { name: "description", content: "Жизненный Код — личный разбор по дате рождения: Число Ума, Число Жизненного Пути, Дхарма, Цикл Жизни и Финансовый код. Цветная и чёрно-белая версии для скачивания." },
+      { property: "og:title", content: "Жизненный Код — личный разбор по дате рождения" },
+      { property: "og:description", content: "Число Ума, Число Жизненного Пути, Дхарма, Цикл Жизни и Финансовый код в личном разборе от Оксаны Шиповской." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -84,7 +84,7 @@ function Index() {
       <section className="no-print bg-hero px-5 pb-10 pt-10 text-primary-foreground">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-xs uppercase tracking-[0.35em] text-accent">Ведическая нумерология</p>
-          <h1 className="mt-4 text-5xl font-semibold leading-tight md:text-7xl">Янтра вашей судьбы</h1>
+          <h1 className="mt-4 text-5xl font-semibold leading-tight md:text-7xl">Жизненный Код</h1>
           <p className="mx-auto mt-5 max-w-xl text-base opacity-85">
             Введите имя и дату рождения - и получите подробный личный разбор: Число Ума, Число Жизненного Пути, Дхарму, Цикл Жизни и Финансовый код. Сохраните его в цвете или в чёрно-белом варианте для печати.
           </p>
