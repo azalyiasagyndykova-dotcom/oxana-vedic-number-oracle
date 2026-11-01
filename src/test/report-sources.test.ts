@@ -1,14 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { MIND, PATH, DHARMA, YEAR, KEYS, MONEY } from "@/lib/report-texts";
-import { SAMPLE_MIND, SAMPLE_PATH, SAMPLE_DHARMA, SAMPLE_YEAR, SAMPLE_KEYS, SAMPLE_MONEY } from "@/lib/report-texts/sample";
+import { SAMPLE_KEYS, SAMPLE_MONEY } from "@/lib/report-texts/sample";
 import sources from "@/lib/report-texts/sources.json";
 
 describe("Авторские источники разбора", () => {
-  it("образец остаётся приоритетным для его чисел", () => {
-    expect(MIND[6]).toBe(SAMPLE_MIND);
-    expect(PATH[4]).toBe(SAMPLE_PATH);
-    expect(DHARMA[9]).toBe(SAMPLE_DHARMA);
-    expect(YEAR[1]).toBe(SAMPLE_YEAR);
+  it("разделы в новом стиле, без исторических личностей", () => {
+    for (const set of [MIND, PATH, DHARMA, YEAR]) {
+      for (let n = 1; n <= 9; n++) {
+        const titles = set[n]!.sections.map((s) => s.title);
+        expect(titles.slice(0, 4)).toEqual(["Кто ты: твоя суперсила", "Где твои деньги и энергия", "Красные флаги: куда утекают силы", "Инструкция: бери и делай"]);
+      }
+    }
+    expect(JSON.stringify(PATH[4])).not.toContain("Ли Куан");
     expect(KEYS[6]).toBe(SAMPLE_KEYS);
     expect(MONEY).toEqual(SAMPLE_MONEY);
   });
