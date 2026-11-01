@@ -25,7 +25,7 @@ export const addClient = createServerFn({ method: "POST" }).middleware([requireS
   if (error) throw new Error("Не удалось проверить права");
   assertOwner(Boolean(owner));
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({ email: data.email, password: data.password, email_confirm: true, user_metadata: { display_name: data.name } });
+  const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({ email: data.email, password: data.password, email_confirm: true, app_metadata: { owner_provisioned: true }, user_metadata: { display_name: data.name } });
   if (createError || !created.user) throw new Error("Не удалось добавить клиента. Проверьте почту и надёжность пароля; возможно, аккаунт уже существует.");
   const { error: accessError } = await context.supabase.from("client_access").insert({ user_id: created.user.id, email: data.email, expires_at: expiresAfterMonths(new Date(), data.months) });
   if (accessError) { await supabaseAdmin.auth.admin.deleteUser(created.user.id); throw new Error("Не удалось сохранить доступ"); }
@@ -70,7 +70,7 @@ export const prepareOwner = createServerFn({ method: "POST" }).inputValidator(in
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { count, error } = await supabaseAdmin.from("user_roles").select("id", { count: "exact", head: true });
   if (error || count !== 0) return { ok: false };
-  const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({ email: data.email, password: data.password, email_confirm: true, user_metadata: { display_name: "Владелец" } });
+  const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({ email: data.email, password: data.password, email_confirm: true, app_metadata: { owner_provisioned: true }, user_metadata: { display_name: "Владелец" } });
   if (createError || !created.user) return { ok: false };
   const { error: roleError } = await supabaseAdmin.from("user_roles").insert({ user_id: created.user.id, role: "owner" });
   if (roleError) { await supabaseAdmin.auth.admin.deleteUser(created.user.id); return { ok: false }; }
