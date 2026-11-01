@@ -11,7 +11,8 @@ function layout(el: HTMLElement) {
     const keep = /^H[1-4]$/.test(n.tagName) ? 90 : 0;
     return [r.top - top, r.bottom - top + keep] as const;
   });
-  const forced = [...el.querySelectorAll<HTMLElement>(".page-break")].map((n) => n.getBoundingClientRect().top - top);
+  // разделы идут подряд без принудительных разрывов — без пустых полустраниц
+  const forced: number[] = [];
   return { atoms, forced };
 }
 
