@@ -108,10 +108,11 @@ export function Report({ b, name }: { b: BasicReport; name: string }) {
         <div className="avoid mt-2 grid gap-x-6 gap-y-1 sm:grid-cols-2">
           {([["Рождённые", m.born], ["Управитель", k.planet], ["Благоприятный день", k.day], ["Цвет удачи", k.color],
             ["Камень", k.stone], ["Металл", k.metal], ["Сильный период", k.strong], ["Слабый период", k.weak],
-             ["Благоприятные цифры", k.good], ["Нейтральные цифры", k.neutral]] as const).filter(([, v]) => Boolean(v)).map(([l, v]) => (
+              ["Благоприятные цифры", k.good], ["Нейтральные цифры", k.neutral], ["День поста", k.fastingDay], ["Числа месяца для поста", k.fastingDates]] as const).filter(([, v]) => Boolean(v)).map(([l, v]) => (
             <p key={l} className={`leading-snug ${l === "Управитель" ? "sm:col-span-2" : ""}`}><span className="font-semibold text-primary">{l}:</span> {v}</p>
           ))}
         </div>
+        <p className="mt-2 text-xs text-muted-foreground">Пост — добровольная практика, не медицинская рекомендация. Ограничения питания согласуйте с врачом.</p>
         <Block s={{ title: "Влияние номера дома или квартиры", text: REPORT_COMMON.flatIntro }} />
         <Block s={{ title: "Как узнать, какое влияние оказывает номер дома или квартиры", text: REPORT_COMMON.flatCalculation }} />
         <div className="mt-1 space-y-1">
