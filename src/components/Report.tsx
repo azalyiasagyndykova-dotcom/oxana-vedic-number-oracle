@@ -29,7 +29,7 @@ function Block({ s }: { s: Section }) {
 
 function Part({ title, short, children, first }: { title: string; short: ReactNode; children: ReactNode; first?: boolean }) {
   return (
-    <section className={`${first ? "" : "page-break "}pt-2`}>
+    <section className={`${first ? "" : "mt-6 "}pt-2`}>
       <h2 className="avoid border-b-2 border-gold pb-1 text-center text-3xl font-semibold text-primary">{title}</h2>
       <div className="avoid mt-3 rounded-xl bg-secondary px-4 py-3">
         <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Краткое описание</div>
