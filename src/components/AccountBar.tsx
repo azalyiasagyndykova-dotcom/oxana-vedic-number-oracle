@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 
-export function AccountBar({ owner, expires }: { owner: boolean; expires?: string }) {
+export function AccountBar({ owner, expires }: { owner: boolean; expires?: string | undefined }) {
   const cache = useQueryClient();
   const navigate = useNavigate();
   async function logout() {
