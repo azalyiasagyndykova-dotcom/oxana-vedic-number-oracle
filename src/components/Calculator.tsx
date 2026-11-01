@@ -1,23 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
-import { calculateBasics, isValidDate, type BasicReport } from "@/lib/numerology";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getAccess } from "@/lib/access.functions";
+import { generateReport } from "@/lib/report.functions";
+import { AccountBar } from "./AccountBar";
+import { Button } from "@/components/ui/button";
 import { CONTACTS } from "@/lib/texts";
 import { Report } from "@/components/Report";
 import { downloadReport } from "@/lib/download";
-
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Жизненный Код | Оксана Шиповская" },
-      { name: "description", content: "Жизненный Код — личный разбор по дате рождения: Число Ума, Число Жизненного Пути, Дхарма, Цикл Жизни и Финансовый код. Цветная и чёрно-белая версии для скачивания." },
-      { property: "og:title", content: "Жизненный Код — личный разбор по дате рождения" },
-      { property: "og:description", content: "Число Ума, Число Жизненного Пути, Дхарма, Цикл Жизни и Финансовый код в личном разборе от Оксаны Шиповской." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: Index,
-});
 
 function Contacts({ compact = false }: { compact?: boolean }) {
   const items = [
@@ -39,23 +29,31 @@ function Contacts({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function Index() {
+export function Calculator() {
+  const fetchAccess = useServerFn(getAccess);
+  const createReport = useServerFn(generateReport);
+  const state = useQuery({ queryKey: ["access"], queryFn: () => fetchAccess(), refetchInterval: 15000 });
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
   const [error, setError] = useState("");
-  const [result, setResult] = useState<BasicReport | null>(null);
+  const [report, setReport] = useState<Awaited<ReturnType<typeof generateReport>> | null>(null);
+  const result = report?.b;
+  const [calculating, setCalculating] = useState(false);
   const [personName, setPersonName] = useState("");
 
-  function onSubmit(e: FormEvent) {
+  async function onSubmit(e: FormEvent) {
     e.preventDefault();
     const m = date.trim().match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);
     if (!m) return setError("Введите дату в формате ДД.ММ.ГГГГ, например 06.03.2002");
     const [d, mo, y] = [Number(m[1]), Number(m[2]), Number(m[3])];
-    if (!isValidDate(d, mo, y)) return setError("Такой даты не существует. Проверьте день, месяц и год.");
     setError("");
-    setPersonName(name.trim());
-    setResult(calculateBasics(d, mo, y, new Date().getFullYear()));
-    setTimeout(() => document.getElementById("report")?.scrollIntoView({ behavior: "smooth" }), 50);
+    setCalculating(true);
+    try {
+      const next = await createReport({ data: { day: d, month: mo, year: y } });
+      setPersonName(name.trim()); setReport(next);
+      setTimeout(() => document.getElementById("report")?.scrollIntoView({ behavior: "smooth" }), 50);
+    } catch (e) { setError(e instanceof Error ? e.message : "Не удалось рассчитать разбор"); }
+    finally { setCalculating(false); }
   }
 
   const [busy, setBusy] = useState<"" | "color" | "bw">("");
@@ -64,7 +62,10 @@ function Index() {
     const ds = `${String(result.date.day).padStart(2, "0")}.${String(result.date.month).padStart(2, "0")}.${result.date.year}`;
     setBusy(bw ? "bw" : "color");
     try {
-      await downloadReport(document.getElementById("report-doc")!, `${personName || "Разбор"} ${ds}${bw ? " (ч-б)" : ""}`, bw);
+      const current = await fetchAccess();
+      const element = document.getElementById("report-doc");
+      if (!current.allowed || !element) throw new Error("Доступ закрыт");
+      await downloadReport(element, `${personName || "Разбор"} ${ds}${bw ? " (ч-б)" : ""}`, bw);
     } catch (e) {
       console.error(e);
       alert("Не удалось сохранить файл. Попробуйте ещё раз.");
@@ -79,8 +80,12 @@ function Index() {
     setDate(out);
   }
 
+  if (state.isPending) return <p className="p-6 text-center text-muted-foreground">Проверяю доступ…</p>;
+  if (!state.data?.allowed) return <main className="min-h-screen bg-background"><AccountBar owner={false} /><div className="mx-auto max-w-xl px-5 py-20 text-center"><h1 className="text-3xl text-primary">{state.isError ? "Не удалось проверить доступ" : "Доступ закрыт"}</h1><p className="mt-4">{state.isError ? "Попробуйте обновить страницу." : "Срок закончился или владелец закрыл доступ. Напишите владельцу для продления."}</p></div></main>;
+
   return (
     <main className="min-h-screen bg-background text-foreground">
+      <AccountBar owner={state.data.owner} expires={state.data.access?.expires_at} />
       <section className="no-print bg-hero px-5 pb-10 pt-10 text-primary-foreground">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-xs uppercase tracking-[0.35em] text-accent">Ведическая нумерология</p>
@@ -91,7 +96,7 @@ function Index() {
           <form onSubmit={onSubmit} className="mx-auto mt-6 grid max-w-xl gap-3 rounded-2xl bg-card p-5 text-left text-card-foreground shadow-soft md:grid-cols-[1fr_1fr_auto]">
             <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Имя
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ваше имя"
+              <input value={name} maxLength={100} onChange={(e) => setName(e.target.value)} placeholder="Ваше имя"
                 className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-3 text-base font-normal normal-case tracking-normal text-foreground outline-none focus:border-accent" />
             </label>
             <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -99,9 +104,7 @@ function Index() {
               <input value={date} onChange={(e) => onDateInput(e.target.value)} placeholder="ДД.ММ.ГГГГ" inputMode="numeric"
                 className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-3 text-base font-normal tracking-normal text-foreground outline-none focus:border-accent" />
             </label>
-            <button type="submit" className="self-end rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition hover:opacity-90">
-              Рассчитать
-            </button>
+            <Button type="submit" disabled={calculating} className="h-12 self-end px-6 font-semibold">{calculating ? "Рассчитываю…" : "Рассчитать"}</Button>
             {error && <p className="text-sm text-destructive md:col-span-3">{error}</p>}
           </form>
         </div>
@@ -111,12 +114,12 @@ function Index() {
         <section id="report" className="mx-auto max-w-3xl px-4 py-6">
           <div className="sticky top-0 z-20 -mx-4 mb-4 border-b border-border bg-secondary/95 px-4 py-3 backdrop-blur">
             <div className="grid grid-cols-2 gap-2">
-              <button disabled={!!busy} onClick={() => download(false)} className="min-h-12 rounded-xl bg-primary px-3 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-60 sm:text-base">{busy === "color" ? "Готовлю файл…" : "⬇ Скачать цветной"}</button>
-              <button disabled={!!busy} onClick={() => download(true)} className="min-h-12 rounded-xl border-2 border-primary bg-card px-3 py-3 text-sm font-semibold text-primary disabled:opacity-60 sm:text-base">{busy === "bw" ? "Готовлю файл…" : "⬇ Скачать ч-б"}</button>
+              <Button disabled={!!busy} onClick={() => download(false)} className="min-h-12 px-3 py-3 text-sm font-semibold sm:text-base">{busy === "color" ? "Готовлю файл…" : "⬇ Скачать цветной"}</Button>
+              <Button variant="outline" disabled={!!busy} onClick={() => download(true)} className="min-h-12 border-2 border-primary px-3 py-3 text-sm font-semibold text-primary sm:text-base">{busy === "bw" ? "Готовлю файл…" : "⬇ Скачать ч-б"}</Button>
             </div>
             <p className="mt-1.5 text-center text-xs text-secondary-foreground">На телефоне и iPad откроется меню «Поделиться» - выберите «Заметки», «Файлы» или мессенджер.</p>
           </div>
-          <div id="report-doc"><Report b={result} name={personName} /></div>
+          <div id="report-doc">{report && <Report b={result} name={personName} copy={report.copy} />}</div>
         </section>
       )}
 
