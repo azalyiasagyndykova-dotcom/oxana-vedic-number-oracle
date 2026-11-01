@@ -1,0 +1,2 @@
+CREATE OR REPLACE FUNCTION public.create_user_profile() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN IF coalesce(NEW.raw_app_meta_data->>'owner_provisioned','false') <> 'true' THEN RAISE EXCEPTION 'Accounts can only be provisioned by the owner'; END IF; INSERT INTO public.profiles(id,display_name) VALUES(NEW.id,left(coalesce(NEW.raw_user_meta_data->>'display_name',''),100)); RETURN NEW; END $$;
+REVOKE ALL ON FUNCTION public.create_user_profile() FROM PUBLIC;

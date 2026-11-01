@@ -40,6 +40,8 @@ export interface KeysText {
   weak?: string;
   good?: string;
   neutral?: string;
+  fastingDay?: string;
+  fastingDates?: string;
 }
 
 export interface MoneyDigit { title: string; text: string }

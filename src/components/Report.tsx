@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import type { BasicReport } from "@/lib/numerology";
 import type { Section } from "@/lib/report-types";
-import { MIND, PATH, DHARMA, YEAR, KEYS, FLAT, MONEY, REPORT_COMMON } from "@/lib/report-texts";
+import type { generateReport } from "@/lib/report.functions";
+type ReportCopy = Awaited<ReturnType<typeof generateReport>>["copy"];
 
 function Paras({ text }: { text: string | string[] }) {
   const list = Array.isArray(text) ? text : text.split(/\n\n+/);
@@ -41,9 +42,9 @@ function Part({ title, short, children, first }: { title: string; short: ReactNo
   );
 }
 
-export function Report({ b, name }: { b: BasicReport; name: string }) {
+export function Report({ b, name, copy }: { b: BasicReport; name: string; copy: ReportCopy }) {
   const dateStr = `${String(b.date.day).padStart(2, "0")}.${String(b.date.month).padStart(2, "0")}.${b.date.year}`;
-  const m = MIND[b.mind], p = PATH[b.path], d = DHARMA[b.dharma], y = YEAR[b.cycle], k = KEYS[b.mind];
+  const { mind: m, path: p, dharma: d, year: y, keys: k, flat: FLAT, money: MONEY, common: REPORT_COMMON } = copy;
   if (!m || !p || !d || !y || !k) return null;
   const rows: [string, string | number][] = [
     ["Дата рождения", dateStr], ["Число Ума", b.mind], ["Число Жизненного Пути", b.path],
@@ -108,10 +109,11 @@ export function Report({ b, name }: { b: BasicReport; name: string }) {
         <div className="avoid mt-2 grid gap-x-6 gap-y-1 sm:grid-cols-2">
           {([["Рождённые", m.born], ["Управитель", k.planet], ["Благоприятный день", k.day], ["Цвет удачи", k.color],
             ["Камень", k.stone], ["Металл", k.metal], ["Сильный период", k.strong], ["Слабый период", k.weak],
-             ["Благоприятные цифры", k.good], ["Нейтральные цифры", k.neutral]] as const).filter(([, v]) => Boolean(v)).map(([l, v]) => (
+              ["Благоприятные цифры", k.good], ["Нейтральные цифры", k.neutral], ["День поста", k.fastingDay], ["Числа месяца для поста", k.fastingDates]] as const).filter(([, v]) => Boolean(v)).map(([l, v]) => (
             <p key={l} className={`leading-snug ${l === "Управитель" ? "sm:col-span-2" : ""}`}><span className="font-semibold text-primary">{l}:</span> {v}</p>
           ))}
         </div>
+        <p className="mt-2 text-xs text-muted-foreground">Пост — добровольная практика, не медицинская рекомендация. Ограничения питания согласуйте с врачом.</p>
         <Block s={{ title: "Влияние номера дома или квартиры", text: REPORT_COMMON.flatIntro }} />
         <Block s={{ title: "Как узнать, какое влияние оказывает номер дома или квартиры", text: REPORT_COMMON.flatCalculation }} />
         <div className="mt-1 space-y-1">

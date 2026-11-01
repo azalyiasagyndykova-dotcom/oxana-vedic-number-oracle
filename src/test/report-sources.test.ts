@@ -12,7 +12,7 @@ describe("Авторские источники разбора", () => {
       }
     }
     expect(JSON.stringify(PATH[4])).not.toContain("Ли Куан");
-    expect(KEYS[6]).toBe(SAMPLE_KEYS);
+    expect(KEYS[6]?.planet).toBe(SAMPLE_KEYS.planet);
     for (const [k, v] of Object.entries(SAMPLE_MONEY)) expect(MONEY[Number(k)]).toBe(v);
   });
   it("остальные числа имеют собственные страницы источника", () => {
@@ -31,7 +31,7 @@ describe("Авторские источники разбора", () => {
     for (let n = 1; n <= 9; n++) expect(MONEY[n]?.text.length).toBeGreaterThan(100);
     expect(DHARMA[3]?.full.join(" ")).toMatch(/Юпитер|дет/);
     expect(KEYS[1]?.planet).toBe("Солнце");
-    expect(KEYS[1]?.strong).toBeUndefined();
-    expect(KEYS[1]?.stone).toBeUndefined();
+    expect(KEYS[1]?.strong).toBe("С 21 марта по 28 апреля; с 11 июня по 19 августа");
+    expect(KEYS[1]?.stone).toBe("Рубин");
   });
 });

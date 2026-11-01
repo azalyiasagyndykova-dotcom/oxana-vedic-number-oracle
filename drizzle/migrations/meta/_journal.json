@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1793549402342,
+      "tag": "0000_owner_and_client_access",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793549480170,
+      "tag": "0001_require_owner_provisioned_accounts",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793549585027,
+      "tag": "0002_restrict_function_grants",
+      "breakpoints": true
+    }
+  ]
+}
