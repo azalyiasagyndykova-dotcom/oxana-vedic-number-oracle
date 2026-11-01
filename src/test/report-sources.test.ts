@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { MIND, PATH, DHARMA, YEAR, KEYS, MONEY } from "@/lib/report-texts";
-import { SAMPLE_MIND, SAMPLE_PATH, SAMPLE_DHARMA, SAMPLE_YEAR, SAMPLE_KEYS, SAMPLE_MONEY } from "@/lib/report-texts/sample";
+import { SAMPLE_KEYS, SAMPLE_MONEY } from "@/lib/report-texts/sample";
 import sources from "@/lib/report-texts/sources.json";
 
 describe("Авторские источники разбора", () => {
