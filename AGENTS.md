@@ -13,5 +13,6 @@
 - PDF download renders #report-doc with html2canvas-pro + jsPDF (src/lib/download.ts), cutting pages only between text lines; a `.bw` class on <html> swaps tokens to black-and-white; touch devices get the share sheet — real file, named after client, no print dialog.
 - Private report copy is loaded only inside generateReport's authenticated handler after a database entitlement check; Report receives a selected copy DTO, never imports the full text catalog. This prevents shipping paid report content to signed-out visitors.
 - Account roles live in user_roles with a single-owner unique index; clients are provisioned through owner-checked server functions. Expiry is checked at request time, without scheduled polling jobs.
+- Owner password changes use the Auth user endpoint with the middleware-verified bearer and current password after the role check; sessionless server clients cannot call auth.updateUser.
 - First owner activation uses only the visitor's chosen email/password while no owner exists; no configured credential fallback or activation code is permitted, and the single-owner unique index closes setup permanently afterwards.
 - New success reference PDFs override only supplied keys fields in success-materials.ts, preserving planet and any other source-backed fields; fasting dates are separate from lucky numbers.
