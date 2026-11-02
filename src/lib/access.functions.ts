@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { accessAllowed, assertOwner, clientSchema, expiresAfterMonths, loginSchema, monthsSchema, passwordSchema, ownerSetupSchema, validActivationCode } from "./access";
+import { accessAllowed, assertOwner, clientSchema, expiresAfterMonths, loginSchema, monthsSchema, passwordSchema, ownerSetupSchema } from "./access";
 
 export const getAccess = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const { data: owner, error } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "owner" });
@@ -67,7 +67,6 @@ export const getOwnerSetup = createServerFn({ method: "GET" }).handler(async () 
 });
 
 export const activateOwner = createServerFn({ method: "POST" }).inputValidator(input => ownerSetupSchema.parse(input)).handler(async ({ data }) => {
-  if (!await validActivationCode(data.activationCode, process.env['OWNER_ACTIVATION_CODE'])) throw new Error("Неверный код активации или активация ещё не настроена.");
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { count, error } = await supabaseAdmin.from("user_roles").select("id", { count: "exact", head: true }).eq("role", "owner");
   if (error || count !== 0) throw new Error("Владелец уже создан или первый вход недоступен.");
