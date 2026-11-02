@@ -54,8 +54,13 @@ export const changeOwnerPassword = createServerFn({ method: "POST" }).middleware
   const { data: owner, error } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "owner" });
   if (error) throw new Error("Не удалось проверить права");
   assertOwner(Boolean(owner));
-  const { error: updateError } = await context.supabase.auth.updateUser({ password: data.password, current_password: data.current });
-  if (updateError) throw new Error("Пароль не изменён. Проверьте текущий пароль и надёжность нового.");
+  const { getRequest } = await import("@tanstack/react-start/server");
+  const token = getRequest().headers.get("authorization")?.replace(/^Bearer /, "");
+  const url = process.env["SUPABASE_URL"];
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
+  if (!token || !url || !key) throw new Error("Не удалось подтвердить вход. Войдите в кабинет снова.");
+  const { updateOwnerPassword } = await import("./owner-password.server");
+  await updateOwnerPassword({ owner: Boolean(owner), url, key, token, current: data.current, password: data.password });
   return { ok: true };
 });
 
