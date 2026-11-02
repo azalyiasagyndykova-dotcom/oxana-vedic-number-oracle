@@ -71,7 +71,7 @@ export const activateOwner = createServerFn({ method: "POST" }).inputValidator(i
   const { count, error } = await supabaseAdmin.from("user_roles").select("id", { count: "exact", head: true }).eq("role", "owner");
   if (error || count !== 0) throw new Error("Владелец уже создан или первый вход недоступен.");
   const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({ email: data.email, password: data.password, email_confirm: true, app_metadata: { owner_provisioned: true }, user_metadata: { display_name: "Владелец" } });
-  if (createError || !created.user) throw new Error("Не удалось создать владельца. Возможно, эта почта уже используется; проверьте также надёжность пароля.");
+  if (createError || !created.user) { const c = (createError as { code?: string } | null)?.code; throw new Error(c === "weak_password" ? "Пароль слишком простой. Придумайте другой: не меньше 8 символов, с заглавной буквой, цифрой и знаком (например !)." : c === "email_exists" ? "Эта почта уже используется." : "Не удалось создать владельца. Попробуйте ещё раз."); }
   // The unique one_owner_only index arbitrates concurrent activation attempts.
   const { error: roleError } = await supabaseAdmin.from("user_roles").insert({ user_id: created.user.id, role: "owner" });
   if (roleError) { await supabaseAdmin.auth.admin.deleteUser(created.user.id); throw new Error("Первый вход уже выполнен или не удалось сохранить владельца."); }
