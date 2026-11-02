@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { accessAllowed, assertOwner, clientSchema, expiresAfterMonths, loginSchema, monthsSchema, passwordSchema } from "./access";
+import { accessAllowed, assertOwner, clientSchema, expiresAfterMonths, loginSchema, monthsSchema, passwordSchema, ownerSetupSchema, validActivationCode } from "./access";
 
 export const getAccess = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const { data: owner, error } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "owner" });
@@ -59,7 +59,27 @@ export const changeOwnerPassword = createServerFn({ method: "POST" }).middleware
   return { ok: true };
 });
 
-// Initial owner can only be created from securely configured credentials, never first-visitor registration.
+export const getOwnerSetup = createServerFn({ method: "GET" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { count, error } = await supabaseAdmin.from("user_roles").select("id", { count: "exact", head: true }).eq("role", "owner");
+  if (error) throw new Error("Не удалось проверить первый вход");
+  return { available: count === 0 };
+});
+
+export const activateOwner = createServerFn({ method: "POST" }).inputValidator(input => ownerSetupSchema.parse(input)).handler(async ({ data }) => {
+  if (!await validActivationCode(data.activationCode, process.env['OWNER_ACTIVATION_CODE'])) throw new Error("Неверный код активации или активация ещё не настроена.");
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { count, error } = await supabaseAdmin.from("user_roles").select("id", { count: "exact", head: true }).eq("role", "owner");
+  if (error || count !== 0) throw new Error("Владелец уже создан или первый вход недоступен.");
+  const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({ email: data.email, password: data.password, email_confirm: true, app_metadata: { owner_provisioned: true }, user_metadata: { display_name: "Владелец" } });
+  if (createError || !created.user) throw new Error("Не удалось создать владельца. Возможно, эта почта уже используется; проверьте также надёжность пароля.");
+  // The unique one_owner_only index arbitrates concurrent activation attempts.
+  const { error: roleError } = await supabaseAdmin.from("user_roles").insert({ user_id: created.user.id, role: "owner" });
+  if (roleError) { await supabaseAdmin.auth.admin.deleteUser(created.user.id); throw new Error("Первый вход уже выполнен или не удалось сохранить владельца."); }
+  return { ok: true };
+});
+
+// Legacy bootstrap remains restricted to securely configured credentials.
 export const prepareOwner = createServerFn({ method: "POST" }).inputValidator(input => loginSchema.parse(input)).handler(async ({ data }) => {
   const email = process.env['OWNER_EMAIL'];
   const password = process.env['OWNER_PASSWORD'];
