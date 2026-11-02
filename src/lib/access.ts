@@ -12,7 +12,7 @@ export async function validActivationCode(supplied: string, configured: string |
   const [a, b] = await Promise.all([digest(supplied), digest(configured)]);
   const left = new Uint8Array(a); const right = new Uint8Array(b);
   let difference = 0;
-  for (let i = 0; i < left.length; i++) difference |= left[i] ^ right[i];
+  for (const [i, byte] of left.entries()) difference |= byte ^ (right[i] ?? 0);
   return difference === 0;
 }
 
