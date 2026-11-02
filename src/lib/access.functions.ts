@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { accessAllowed, assertOwner, clientSchema, expiresAfterMonths, loginSchema, monthsSchema, passwordSchema, ownerSetupSchema } from "./access";
+import { accessAllowed, assertOwner, clientSchema, expiresAfterMonths, monthsSchema, passwordSchema, ownerSetupSchema } from "./access";
 
 export const getAccess = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const { data: owner, error } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "owner" });
@@ -75,23 +75,5 @@ export const activateOwner = createServerFn({ method: "POST" }).inputValidator(i
   // The unique one_owner_only index arbitrates concurrent activation attempts.
   const { error: roleError } = await supabaseAdmin.from("user_roles").insert({ user_id: created.user.id, role: "owner" });
   if (roleError) { await supabaseAdmin.auth.admin.deleteUser(created.user.id); throw new Error("Первый вход уже выполнен или не удалось сохранить владельца."); }
-  return { ok: true };
-});
-
-// Legacy bootstrap remains restricted to securely configured credentials.
-export const prepareOwner = createServerFn({ method: "POST" }).inputValidator(input => loginSchema.parse(input)).handler(async ({ data }) => {
-  const email = process.env['OWNER_EMAIL'];
-  const password = process.env['OWNER_PASSWORD'];
-  if (!email || !password) return { ok: false };
-  const { createHash, timingSafeEqual } = await import("node:crypto");
-  const equal = (a: string, b: string) => timingSafeEqual(createHash("sha256").update(a).digest(), createHash("sha256").update(b).digest());
-  if (!equal(data.email, email.trim().toLowerCase()) || !equal(data.password, password)) return { ok: false };
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { count, error } = await supabaseAdmin.from("user_roles").select("id", { count: "exact", head: true });
-  if (error || count !== 0) return { ok: false };
-  const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({ email: data.email, password: data.password, email_confirm: true, app_metadata: { owner_provisioned: true }, user_metadata: { display_name: "Владелец" } });
-  if (createError || !created.user) return { ok: false };
-  const { error: roleError } = await supabaseAdmin.from("user_roles").insert({ user_id: created.user.id, role: "owner" });
-  if (roleError) { await supabaseAdmin.auth.admin.deleteUser(created.user.id); return { ok: false }; }
   return { ok: true };
 });

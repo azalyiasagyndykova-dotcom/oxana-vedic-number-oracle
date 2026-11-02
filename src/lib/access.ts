@@ -6,16 +6,6 @@ export const loginSchema = z.object({ email: z.string().trim().email("Прове
 export const clientSchema = loginSchema.extend({ name: z.string().trim().min(1, "Введите имя").max(100), password: passwordSchema, months: monthsSchema });
 export const ownerSetupSchema = loginSchema.extend({ password: passwordSchema, confirmPassword: z.string().max(128) }).refine(data => data.password === data.confirmPassword, { message: "Пароли не совпадают", path: ["confirmPassword"] });
 
-export async function validActivationCode(supplied: string, configured: string | undefined): Promise<boolean> {
-  if (!configured) return false;
-  const digest = (value: string) => crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
-  const [a, b] = await Promise.all([digest(supplied), digest(configured)]);
-  const left = new Uint8Array(a); const right = new Uint8Array(b);
-  let difference = 0;
-  for (const [i, byte] of left.entries()) difference |= byte ^ (right[i] ?? 0);
-  return difference === 0;
-}
-
 export function expiresAfterMonths(start: Date, months: 1 | 3 | 6 | 12): string {
   const result = new Date(start);
   const day = result.getUTCDate();
