@@ -6,7 +6,7 @@ const GRID_LABELS = ["Подход", "Характер", "Метод", "Ты и 
 export function YantraReport({ data, name }: { data: YantraReportData; name: string }) {
   const { y, sections } = data;
   const date = `${String(y.date.day).padStart(2, "0")}.${String(y.date.month).padStart(2, "0")}.${y.date.year}`;
-  return <article className="report-body bg-background text-[15px] text-foreground">
+  return <article data-report="yantra" className="report-body bg-background text-[15px] text-foreground">
     <header className="border-b-2 border-gold pb-5 pt-2 text-center">
       <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Личный разбор по Янтре</p>
       <h1 className="mt-2 break-words text-4xl font-semibold text-primary">{name || "Твой Код Янтры"}</h1>
@@ -25,7 +25,7 @@ export function YantraReport({ data, name }: { data: YantraReportData; name: str
     </div>
     <p className="mt-3 text-xs leading-relaxed text-muted-foreground">Янтра — символический способ посмотреть на свои привычки и выборы, а не научная оценка личности или прогноз. Бери то, что помогает тебе в реальной жизни.</p>
     {sections.map(({ key, title, value, meaning }) => <section key={key} className="mt-6">
-      <h2 className="border-b border-gold pb-1 text-2xl font-semibold text-primary">{title} · {value}</h2>
+      <h2 className="border-b border-gold pb-1 text-2xl font-semibold text-primary">{title} · {value}{key === "integral" ? ` (ЧЖП ${y.base.lifePath})` : ""}</h2>
       {meaning ? <>
         <h3 className="mt-3 text-lg font-semibold text-primary">Твоя суперсила</h3>
         <p className="mt-1 leading-relaxed">{meaning.essence}</p>
