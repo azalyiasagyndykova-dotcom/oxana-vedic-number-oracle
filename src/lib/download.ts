@@ -5,6 +5,25 @@ const WIDTH = 720; // ширина листа при рендере, px
 /** Безопасные места разреза: границы, не проходящие через строки текста и карточки. */
 function layout(el: HTMLElement) {
   const top = el.getBoundingClientRect().top;
+  if (el.querySelector('[data-report="yantra"]')) {
+    const atoms: (readonly [number, number])[] = [];
+    for (const node of el.querySelectorAll<HTMLElement>("h1, h2, h3, h4, .avoid-cell")) {
+      const rect = node.getBoundingClientRect();
+      atoms.push([rect.top - top, rect.bottom - top + (/^H[1-4]$/.test(node.tagName) ? 28 : 0)]);
+    }
+    // Protect actual text lines, not entire paragraphs: a long paragraph can continue on the next page.
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    let node = walker.nextNode();
+    while (node) {
+      if (node.textContent?.trim() && !node.parentElement?.closest("h1, h2, h3, h4, .avoid-cell")) {
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        for (const rect of range.getClientRects()) atoms.push([rect.top - top, rect.bottom - top]);
+      }
+      node = walker.nextNode();
+    }
+    return { atoms, forced: [] as number[] };
+  }
   const atoms = [...el.querySelectorAll<HTMLElement>("p, li, h1, h2, h3, h4, .avoid-cell")].map((n) => {
     const r = n.getBoundingClientRect();
     // заголовок держим вместе с началом следующего текста

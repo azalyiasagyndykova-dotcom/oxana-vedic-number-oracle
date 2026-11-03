@@ -6,7 +6,7 @@ const GRID_LABELS = ["Подход", "Характер", "Метод", "Ты и 
 export function YantraReport({ data, name }: { data: YantraReportData; name: string }) {
   const { y, sections } = data;
   const date = `${String(y.date.day).padStart(2, "0")}.${String(y.date.month).padStart(2, "0")}.${y.date.year}`;
-  return <article className="report-body bg-background text-[15px] text-foreground">
+  return <article data-report="yantra" className="report-body bg-background text-[15px] text-foreground">
     <header className="border-b-2 border-gold pb-5 pt-2 text-center">
       <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Личный разбор по Янтре</p>
       <h1 className="mt-2 break-words text-4xl font-semibold text-primary">{name || "Твой Код Янтры"}</h1>
