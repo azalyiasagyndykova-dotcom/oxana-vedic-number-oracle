@@ -70,7 +70,11 @@ export async function downloadReport(el: HTMLElement, fileName: string, bw: bool
     const [r, g, b] = probe.getImageData(0, 0, 1, 1).data;
     const bg = `rgb(${r}, ${g}, ${b})`;
     const scale = 2;
-    const canvas = await html2canvas(el, { scale, backgroundColor: bg, windowWidth: document.documentElement.clientWidth });
+    const canvas = await html2canvas(el, {
+      scale, backgroundColor: bg, width: WIDTH, windowWidth: 1024,
+      // фиксированный лист A4 даже на телефоне: копия рендерится как на ноутбуке
+      onclone: (doc) => { const d = doc.getElementById("report-doc"); if (d) { d.style.width = `${WIDTH}px`; d.style.maxWidth = "none"; } },
+    });
     const pdf = new jsPDF({ unit: "mm", format: "a4" });
     const margin = 10, pw = 210 - margin * 2, ph = 297 - margin * 2;
     const pxPerMm = WIDTH / pw;
