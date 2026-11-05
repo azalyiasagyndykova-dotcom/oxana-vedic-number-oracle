@@ -6,6 +6,7 @@ import { YANTRA_TALENTS } from "./yantra-talents";
 import start from "./yantra-start-copy.json";
 import life from "./yantra-life-copy.json";
 import sample from "./yantra-sample-copy.json";
+import { YANTRA_PROBLEM } from "./yantra-problem-copy";
 
 // Sourced and restyled meanings from SANA. Код Янтры; page references use PDF pagination.
 const book: YantraCatalog = {
@@ -14,7 +15,7 @@ const book: YantraCatalog = {
 };
 
 // Merge only the supplied metric/value pairs; other source-backed values remain intact.
-export const YANTRA_COPY: YantraCatalog = { ...book };
+export const YANTRA_COPY: YantraCatalog = { ...book, ...YANTRA_PROBLEM };
 for (const key of Object.keys(sample) as (keyof YantraCatalog)[]) {
   const additions = (sample as YantraCatalog)[key];
   YANTRA_COPY[key] = { ...book[key], ...additions };
