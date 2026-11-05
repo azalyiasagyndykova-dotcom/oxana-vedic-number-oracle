@@ -5,13 +5,23 @@ import { selectYantraSections, type YantraMeaning } from "@/lib/yantra-report-ty
 const meaning: YantraMeaning = { essence: "a", energy: "b", flags: "c", actions: ["d"], pages: [1] };
 
 describe("Выбор трактовок Янтры", () => {
-  it("выдаёт 16 позиций и интеграл для 06.03.2002", () => {
+  it("выдаёт 16 позиций, вектор и интеграл для 06.03.2002", () => {
     const sections = selectYantraSections(calculateYantra(6, 3, 2002), {});
-    expect(sections.map(s => s.value)).toEqual([3, 6, 4, 4, 2, 6, 1, 8, 5, 5, 5, 2, 7, 0, 7, 3, 8]);
+    expect(sections.map(s => s.value)).toEqual([3, 6, 4, 4, 2, 6, 1, 8, 5, 5, 5, 2, 7, 0, 7, 3, 7, 8]);
   });
   it("сохраняет заботу −1 для февраля без подмены положительным числом", () => {
     const sections = selectYantraSections(calculateYantra(1, 2, 1990), { care: { [-1]: meaning, 1: { ...meaning, pages: [2] } } });
     expect(sections.find(s => s.key === "care")?.meaning?.pages).toEqual([1]);
+  });
+  it("ставит явно указанное число проблем перед вектором и интегралом", () => {
+    const sections = selectYantraSections(calculateYantra(19, 9, 1975), { problem: { 5: meaning } }, 5);
+    expect(sections.slice(-3).map(s => [s.key, s.value])).toEqual([["problem", 5], ["vector", 7], ["integral", 1]]);
+    expect(sections.find(s => s.key === "problem")?.meaning).toBe(meaning);
+  });
+  it("не угадывает число проблем из даты и не подменяет отсутствующую трактовку", () => {
+    const y = calculateYantra(19, 9, 1975);
+    expect(selectYantraSections(y, {}).some(s => s.key === "problem")).toBe(false);
+    expect(selectYantraSections(y, { problem: { 5: meaning } }, 4).find(s => s.key === "problem")?.meaning).toBeNull();
   });
   it("сохраняет заботу −2 для октября", () => {
     expect(selectYantraSections(calculateYantra(1, 10, 1990), {}).find(s => s.key === "care")?.value).toBe(-2);

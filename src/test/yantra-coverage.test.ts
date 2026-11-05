@@ -4,11 +4,11 @@ import { selectYantraSections } from "@/lib/yantra-report-types";
 import { YANTRA_COPY } from "@/lib/yantra-copy";
 
 describe("Полнота трактовок нового разбора", () => {
-  it("все 17 рассчитанных значений обеспечены материалом для каждой допустимой комбинации", () => {
+  it("все 16 позиций и интеграл обеспечены материалом для каждой допустимой комбинации", () => {
     for (let day = 1; day <= 9; day++) for (let month = 1; month <= 12; month++) for (let year = 2000; year <= 2008; year++) {
       const sections = selectYantraSections(calculateYantra(day, month, year), YANTRA_COPY);
-      expect(sections).toHaveLength(17);
-      for (const section of sections) {
+      expect(sections).toHaveLength(18);
+      for (const section of sections.filter(s => s.key !== "vector")) {
         expect(section.meaning, `${section.key}:${section.value}`).not.toBeNull();
         expect(section.meaning?.pages.every(page => page >= 1 && page <= (section.meaning?.source === "sample-2026-11-05" ? 33 : 288))).toBe(true);
       }

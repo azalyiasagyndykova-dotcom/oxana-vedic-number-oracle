@@ -5,9 +5,9 @@ import { selectYantraSections } from "@/lib/yantra-report-types";
 
 describe("Материалы подтверждённого образца Янтры", () => {
   it("для 19.09.1975 выбирает все 17 разделов из нового образца", () => {
-    const sections = selectYantraSections(calculateYantra(19, 9, 1975), YANTRA_COPY);
-    expect(sections.map(s => s.value)).toEqual([9, 1, 4, 5, 2, 7, 7, 3, 6, 5, 0, 8, 2, 6, 8, 3, 1]);
-    expect(sections.every(s => s.meaning?.source === "sample-2026-11-05")).toBe(true);
+    const sections = selectYantraSections(calculateYantra(19, 9, 1975), YANTRA_COPY, 5);
+    expect(sections.map(s => s.value)).toEqual([9, 1, 4, 5, 2, 7, 7, 3, 6, 5, 0, 8, 2, 6, 8, 3, 5, 7, 1]);
+    expect(sections.filter(s => s.key !== "vector").every(s => s.meaning?.source === "sample-2026-11-05")).toBe(true);
   });
   it("материал тройки выбирается для задачи 2, а не задачи 3", () => {
     const sections = selectYantraSections(calculateYantra(3, 9, 1975), YANTRA_COPY);
