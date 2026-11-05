@@ -1,7 +1,7 @@
 import type { YantraReportData } from "@/lib/yantra-report-types";
 import { YANTRA_TITLES } from "@/lib/yantra-report-types";
 
-const GRID_LABELS = ["Подход", "Характер", "Метод", "Ты и мир", "Энергия", "Близкие", "Расходы", "Общение", "Таланты", "Счастье", "Задачи", "Любовь", "Доход", "Забота", "Возможности", "Философия"];
+const GRID_LABELS = ["Подход", "Характер", "Метод", "Карма", "Прана", "Отношения", "Расходы", "Коммуникация", "Сиддхи", "Счастье", "Задачи", "Любовь", "Самореализация", "Забота", "Возможности", "Философия"];
 
 const SECTION_LABELS: Record<YantraReportData["sections"][number]["key"], readonly [string, string, string]> = {
   approach: ["Как ты входишь в новое", "Что помогает начать", "Что гасит твой запал"],
@@ -45,8 +45,8 @@ export function YantraReport({ data, name }: { data: YantraReportData; name: str
         <span className="mt-1 block font-display text-3xl font-semibold leading-none text-primary">{y.matrix[key]}</span>
       </div>)}
     </div>
-    <div className="mt-2 grid grid-cols-3 gap-2">
-      {[["Интеграл", y.integral], ["Вектор", y.vector], ["Экспрессия", y.expression]].map(([title, value]) => <div key={title} className="avoid-cell rounded-lg border border-gold bg-secondary px-2 py-2 text-center">
+    <div className="mt-2 grid grid-cols-2 gap-2">
+      {[["Вектор жизни", y.vector], ["Интеграл", y.integral]].map(([title, value]) => <div key={title} className="avoid-cell rounded-lg border border-gold bg-secondary px-2 py-2 text-center">
         <p className="text-xs text-muted-foreground">{title}</p><p className="font-display text-2xl font-semibold leading-tight text-primary">{value}</p>
       </div>)}
     </div>
