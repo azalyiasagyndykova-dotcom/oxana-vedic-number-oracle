@@ -45,7 +45,7 @@ export function YantraReport({ data, name }: { data: YantraReportData; name: str
         <span className="mt-1 block font-display text-3xl font-semibold leading-none text-primary">{y.matrix[key]}</span>
       </div>)}
     </div>
-    <div className="mt-2 grid grid-cols-3 gap-2">
+    <div className="mt-2 grid grid-cols-2 gap-2">
       {[["Вектор жизни", y.vector], ["Интеграл", y.integral]].map(([title, value]) => <div key={title} className="avoid-cell rounded-lg border border-gold bg-secondary px-2 py-2 text-center">
         <p className="text-xs text-muted-foreground">{title}</p><p className="font-display text-2xl font-semibold leading-tight text-primary">{value}</p>
       </div>)}
