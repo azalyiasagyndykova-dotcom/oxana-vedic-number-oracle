@@ -10,7 +10,7 @@ describe("Полнота трактовок нового разбора", () => 
       expect(sections).toHaveLength(17);
       for (const section of sections) {
         expect(section.meaning, `${section.key}:${section.value}`).not.toBeNull();
-        expect(section.meaning?.pages.every(page => page >= 1 && page <= 288)).toBe(true);
+        expect(section.meaning?.pages.every(page => page >= 1 && page <= (section.meaning?.source === "sample-2026-11-05" ? 33 : 288))).toBe(true);
       }
     }
   });

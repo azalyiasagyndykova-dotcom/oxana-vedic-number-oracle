@@ -53,7 +53,13 @@ export function YantraReport({ data, name }: { data: YantraReportData; name: str
     <p className="mt-3 text-xs leading-relaxed text-muted-foreground">Янтра — символический способ посмотреть на свои привычки и выборы, а не научная оценка личности или прогноз. Бери то, что помогает тебе в реальной жизни.</p>
     {sections.map(({ key, title, value, meaning }) => <section key={key} className="mt-6">
       <h2 className="border-b-2 border-gold pb-1 text-center text-2xl font-semibold text-primary">{title} · {value}{key === "integral" ? ` (ЧЖП ${y.base.lifePath})` : ""}</h2>
-      {meaning ? <>
+      {meaning?.blocks ? <div className="mt-3 space-y-4">
+        {meaning.blocks.map((block, index) => <div key={block.title} className={index === 0 ? "rounded-lg border border-border bg-secondary px-4 py-3" : "px-1"}>
+          <h3 className="font-sans text-base font-semibold text-primary">{block.title}</h3>
+          {block.paragraphs?.map(paragraph => <p key={paragraph} className="mt-2 leading-relaxed">{paragraph}</p>)}
+          {block.items && <ul className="mt-2 list-disc space-y-1.5 pl-5 leading-relaxed marker:text-gold">{block.items.map(item => <li key={item}>{item}</li>)}</ul>}
+        </div>)}
+      </div> : meaning ? <>
         <div className="mt-3 rounded-xl bg-secondary px-4 py-3">
           <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{SECTION_LABELS[key][0]}</h3>
           <p className="mt-1 leading-relaxed">{meaning.essence}</p>
@@ -62,10 +68,10 @@ export function YantraReport({ data, name }: { data: YantraReportData; name: str
           <Block label={SECTION_LABELS[key][1]}><p>{meaning.energy}</p></Block>
           <Block label={SECTION_LABELS[key][2]}><p className="border-l-4 border-gold pl-3">{meaning.flags}</p></Block>
           <Block label="Бери и делай">
-            <ol className="space-y-1">{meaning.actions.map((action, i) => <li key={action} className="flex gap-2"><span className="shrink-0 font-semibold text-gold">{i + 1}.</span><span>{action}</span></li>)}</ol>
+            <ol className="list-none space-y-1">{meaning.actions.map((action, i) => <li key={action} className="flex gap-2"><span className="shrink-0 font-semibold text-gold">{i + 1}.</span><span>{action}</span></li>)}</ol>
           </Block>
         </div>
-      </> : <p className="mt-3 rounded-xl bg-secondary px-4 py-3 leading-relaxed text-muted-foreground">В новой книге нет отдельной трактовки для этого значения в разделе «{YANTRA_TITLES[key]}». Число рассчитано; описание не заменяем догадками.</p>}
+      </> : <p className="mt-3 rounded-xl bg-secondary px-4 py-3 leading-relaxed text-muted-foreground">Для этого значения в разделе «{YANTRA_TITLES[key]}» пока нет проверенной трактовки в материалах разбора. Число рассчитано; описание не заменяем догадками.</p>}
     </section>)}
   </article>;
 }

@@ -6,6 +6,8 @@ export interface YantraMeaning {
   flags: string;
   actions: string[];
   pages: number[];
+  source?: "sample-2026-11-05" | "tasks-three-2026-11-05";
+  blocks?: { title: string; paragraphs?: string[]; items?: string[] }[];
 }
 
 export type YantraCatalog = Partial<Record<PositionKey | "integral", Record<number, YantraMeaning>>>;
