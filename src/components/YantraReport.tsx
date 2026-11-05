@@ -21,6 +21,8 @@ const SECTION_LABELS: Record<YantraReportData["sections"][number]["key"], readon
   opportunities: ["Где тебе становится просторнее", "Как открываться новому", "Что сужает твой выбор"],
   philosophy: ["На чём держится твой взгляд на жизнь", "Как укрепить внутреннюю опору", "Когда убеждения становятся клеткой"],
   integral: ["Главная нить твоего разбора", "Как собрать себя в целое", "Что сбивает с твоего пути"],
+  problem: ["Твоя точка роста", "Как раскрыть свои возможности", "Что удерживает тебя"],
+  vector: ["Куда ты направляешь силы", "Как выбрать свой путь", "Что уводит в сторону"],
 };
 
 function Block({ label, children }: { label: string; children: React.ReactNode }) {
@@ -46,7 +48,7 @@ export function YantraReport({ data, name }: { data: YantraReportData; name: str
       </div>)}
     </div>
     <div className="mt-2 grid grid-cols-2 gap-2">
-      {[["Вектор жизни", y.vector], ["Интеграл", y.integral]].map(([title, value]) => <div key={title} className="avoid-cell rounded-lg border border-gold bg-secondary px-2 py-2 text-center">
+      {[["Число проблем", data.problem ?? "—"], ["Вектор жизни", y.vector], ["Интеграл", y.integral]].map(([title, value]) => <div key={title} className="avoid-cell rounded-lg border border-gold bg-secondary px-2 py-2 text-center">
         <p className="text-xs text-muted-foreground">{title}</p><p className="font-display text-2xl font-semibold leading-tight text-primary">{value}</p>
       </div>)}
     </div>
@@ -71,7 +73,7 @@ export function YantraReport({ data, name }: { data: YantraReportData; name: str
             <ol className="list-none space-y-1">{meaning.actions.map((action, i) => <li key={action} className="flex gap-2"><span className="shrink-0 font-semibold text-gold">{i + 1}.</span><span>{action}</span></li>)}</ol>
           </Block>
         </div>
-      </> : <p className="mt-3 rounded-xl bg-secondary px-4 py-3 leading-relaxed text-muted-foreground">Для этого значения в разделе «{YANTRA_TITLES[key]}» пока нет проверенной трактовки в материалах разбора. Число рассчитано; описание не заменяем догадками.</p>}
+      </> : <p className="mt-3 rounded-xl bg-secondary px-4 py-3 leading-relaxed text-muted-foreground">Описание для значения {value} в разделе «{YANTRA_TITLES[key]}» пока недоступно.</p>}
     </section>)}
   </article>;
 }

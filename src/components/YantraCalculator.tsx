@@ -16,6 +16,7 @@ export function YantraCalculator() {
   const access = useQuery({ queryKey: ["access"], queryFn: () => fetchAccess() });
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
+  const [problem, setProblem] = useState("");
   const [personName, setPersonName] = useState("");
   const [data, setData] = useState<YantraReportData | null>(null);
   const [error, setError] = useState("");
@@ -28,7 +29,7 @@ export function YantraCalculator() {
     if (!match) { setError("Введите дату в формате ДД.ММ.ГГГГ"); return; }
     setError(""); setCalculating(true);
     try {
-      const next = await createReport({ data: { day: Number(match[1]), month: Number(match[2]), year: Number(match[3]) } });
+      const next = await createReport({ data: { day: Number(match[1]), month: Number(match[2]), year: Number(match[3]), ...(problem === "" ? {} : { problem: Number(problem) }) } });
       setData(next); setPersonName(name.trim());
       setTimeout(() => document.getElementById("yantra-report")?.scrollIntoView({ behavior: "smooth" }), 50);
     } catch (e) { setError(e instanceof Error ? e.message : "Не удалось составить разбор"); }
@@ -59,6 +60,7 @@ export function YantraCalculator() {
           <label className="text-sm font-semibold">Имя клиента<input value={name} onChange={e => setName(e.target.value)} maxLength={100} placeholder="Имя" className="mt-2 w-full rounded-lg border border-input bg-card px-3 py-3 font-normal outline-none focus:border-accent" /></label>
           <label className="text-sm font-semibold">Дата рождения<input value={date} onChange={e => { const digits = e.target.value.replace(/\D/g, "").slice(0, 8); setDate([digits.slice(0, 2), digits.slice(2, 4), digits.slice(4)].filter(Boolean).join(".")); }} inputMode="numeric" placeholder="ДД.ММ.ГГГГ" className="mt-2 w-full rounded-lg border border-input bg-card px-3 py-3 font-normal outline-none focus:border-accent" /></label>
           <Button type="submit" disabled={calculating} className="min-h-12 self-end px-5">{calculating ? "Составляю…" : "Создать разбор"}</Button>
+          <label className="text-sm font-semibold sm:col-span-2">Число проблем (если известно)<input type="number" min={0} max={9} step={1} value={problem} onChange={e => setProblem(e.target.value)} placeholder="Не указано" className="mt-2 w-full rounded-lg border border-input bg-card px-3 py-3 font-normal outline-none focus:border-accent" /></label>
         </form>
         {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
       </section>
