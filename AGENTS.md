@@ -19,3 +19,5 @@
 - Owner password changes use the Auth user endpoint with the middleware-verified bearer and current password after the role check; sessionless server clients cannot call auth.updateUser.
 - First owner activation uses only the visitor's chosen email/password while no owner exists; no configured credential fallback or activation code is permitted, and the single-owner unique index closes setup permanently afterwards.
 - New success reference PDFs override only supplied keys fields in success-materials.ts, preserving planet and any other source-backed fields; fasting dates are separate from lucky numbers.
+- Client passwords set by the owner are stored in client_secrets (owner-only RLS for select/insert/update/delete) so only the owner can view them in the cabinet; the owner can set a new client password via editClient action "password" (Auth admin update + upsert). Clients never see passwords or management controls.
+- First owner activation is shown on the main page only via the special link /?owner and only while no owner exists; regular visitors see only the login form.

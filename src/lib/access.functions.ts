@@ -17,7 +17,10 @@ export const listClients = createServerFn({ method: "GET" }).middleware([require
   assertOwner(Boolean(owner));
   const { data, error: readError } = await context.supabase.from("client_access").select("*, profiles(display_name)").order("expires_at").limit(1000);
   if (readError) throw new Error("Не удалось загрузить клиентов");
-  return data ?? [];
+  // Пароли клиентов видит только владелец (RLS на client_secrets пускает только роль owner).
+  const { data: secrets } = await context.supabase.from("client_secrets").select("user_id, password").limit(1000);
+  const passwords = new Map((secrets ?? []).map(s => [s.user_id, s.password]));
+  return (data ?? []).map(row => ({ ...row, password: passwords.get(row.user_id) ?? null }));
 });
 
 export const addClient = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator(input => clientSchema.parse(input)).handler(async ({ data, context }) => {
@@ -29,16 +32,23 @@ export const addClient = createServerFn({ method: "POST" }).middleware([requireS
   if (createError || !created.user) throw new Error("Не удалось добавить клиента. Проверьте почту и надёжность пароля; возможно, аккаунт уже существует.");
   const { error: accessError } = await context.supabase.from("client_access").insert({ user_id: created.user.id, email: data.email, expires_at: expiresAfterMonths(new Date(), data.months) });
   if (accessError) { await supabaseAdmin.auth.admin.deleteUser(created.user.id); throw new Error("Не удалось сохранить доступ"); }
+  await context.supabase.from("client_secrets").upsert({ user_id: created.user.id, password: data.password });
   return { ok: true };
 });
 
-export const editClient = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator(input => z.object({ id: z.string().uuid(), action: z.enum(["revoke", "renew", "delete"]), months: monthsSchema }).parse(input)).handler(async ({ data, context }) => {
+export const editClient = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator(input => z.object({ id: z.string().uuid(), action: z.enum(["revoke", "renew", "delete", "password"]), months: monthsSchema, password: passwordSchema.optional() }).parse(input)).handler(async ({ data, context }) => {
   const { data: owner, error } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "owner" });
   if (error) throw new Error("Не удалось проверить права");
   assertOwner(Boolean(owner));
   const { data: client } = await context.supabase.from("client_access").select("user_id,expires_at,revoked").eq("user_id", data.id).maybeSingle();
   if (!client || client.user_id === context.userId) throw new Error("Клиент не найден");
-  if (data.action === "delete") {
+  if (data.action === "password") {
+    if (!data.password) throw new Error("Введите новый пароль клиента");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error: passwordError } = await supabaseAdmin.auth.admin.updateUserById(client.user_id, { password: data.password });
+    if (passwordError) throw new Error("Не удалось сменить пароль. Придумайте пароль надёжнее: заглавная буква, цифра и знак.");
+    await context.supabase.from("client_secrets").upsert({ user_id: client.user_id, password: data.password, updated_at: new Date().toISOString() });
+  } else if (data.action === "delete") {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(client.user_id);
     if (deleteError) throw new Error("Не удалось удалить клиента");
